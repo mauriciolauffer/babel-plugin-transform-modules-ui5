@@ -11,7 +11,7 @@ export const saveImports = (file) => {
 
 // can be called from visitor to access previously present declarations
 export function getImportDeclaration(filename, typeName) {
-  if (!filename || !typeName) {
+  if (!filename || !typeName || !importDeclarations[filename]) {
     return null;
   }
 

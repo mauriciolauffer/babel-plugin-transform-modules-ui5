@@ -164,8 +164,8 @@ export const ClassTransformVisitor = {
 
 function isSuperApply(callee) {
   return (
-    t.isIdentifier(callee.property, { name: "apply" }) &&
-    t.isSuper(callee.object.object)
+    t.isIdentifier(callee?.property, { name: "apply" }) &&
+    t.isSuper(callee?.object?.object)
   );
 }
 
@@ -242,7 +242,7 @@ function shouldConvertClass(file, node, opts, classInfo) {
   if (classInfo.nonUI5) {
     return false;
   }
-  if (opts.autoConvertAllExtendClasses == true) {
+  if (opts.autoConvertAllExtendClasses === true) {
     return true;
   }
   if (

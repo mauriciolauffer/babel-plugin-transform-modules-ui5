@@ -6,41 +6,37 @@ export function isObjectAssignOrExtendsExpression(node) {
 
 export function isObjectAssignExpression(node) {
   if (!t.isCallExpression(node)) return false;
-  const callee = node && node.callee;
+  const callee = node?.callee;
   return !!(
-    callee.object &&
-    callee.property &&
-    callee.object.name === "Object" &&
-    callee.property.name === "assign"
+    callee?.object?.name === "Object" && callee?.property?.name === "assign"
   );
 }
 
 export function isExtendsHelperExpression(node) {
   if (!t.isCallExpression(node)) return false;
-  const callee = node && node.callee;
-  return isIdentifierNamed(callee, "_extends");
+  return isIdentifierNamed(node?.callee, "_extends");
 }
 
 // t.isImport only exists if the dynamic import syntax plugin is used, so avoid using that to make it optional.
 export function isImport(node) {
-  return node && node.type === "Import";
+  return node?.type === "Import";
 }
 
 export function isIdentifierNamed(node, name) {
-  return t.isIdentifier(node, { name: name });
+  return t.isIdentifier(node, { name });
 }
 
 // This doesn't exist on babel-types
 export function isCommentBlock(node) {
-  return node && node.type === "CommentBlock";
+  return node?.type === "CommentBlock";
 }
 
 export function getIdName(node) {
-  return node.id && node.id.name;
+  return node?.id?.name;
 }
 
 export function isSuperCallExpression(expression) {
-  return t.isCallExpression(expression) && expression.callee.type === "Super";
+  return t.isCallExpression(expression) && expression.callee?.type === "Super";
 }
 
 // export function isSuperExpressionStatement(node) {
@@ -83,6 +79,7 @@ export function getInternalStaticThingsOfClass(classNode) {
  *  @return Array<{key, value}>
  */
 export function getOtherPropertiesOfIdentifier(blockScopeNode, idName) {
+  if (!blockScopeNode?.body) return [];
   return blockScopeNode.body
     .map((node) => {
       if (t.isExpressionStatement(node)) {
@@ -105,9 +102,12 @@ export function getOtherPropertiesOfIdentifier(blockScopeNode, idName) {
         }
       } else if (t.isVariableDeclaration(node)) {
         return node.declarations
-          .filter((declaration) => declaration.id.name === idName)
+          .filter(
+            (declaration) =>
+              t.isIdentifier(declaration.id) && declaration.id.name === idName
+          )
           .map((declaration) => declaration.init)
-          .filter((init) => init)
+          .filter(Boolean)
           .filter(
             (init) =>
               t.isObjectExpression(init) ||
@@ -120,7 +120,7 @@ export function getOtherPropertiesOfIdentifier(blockScopeNode, idName) {
           );
       }
     })
-    .filter((item) => item)
+    .filter(Boolean)
     .flat(Infinity);
 }
 
@@ -128,6 +128,7 @@ export function getPropertiesOfObjectAssignOrExtendHelper(
   node,
   blockScopeNode
 ) {
+  if (!node?.arguments) return [];
   // Check all the args and recursively try to get props of identifiers (although they may be imported)
   return node.arguments
     .map((arg) => {
@@ -138,18 +139,21 @@ export function getPropertiesOfObjectAssignOrExtendHelper(
         return getOtherPropertiesOfIdentifier(blockScopeNode, arg.name);
       }
     })
+    .filter(Boolean)
     .flat(Infinity);
 }
 
 export function getPropNames(props) {
-  return props.map((prop) => prop.key.name);
+  return props.map((prop) => prop.key?.name).filter(Boolean);
 }
 
 export function groupPropertiesByName(properties) {
   return (
     properties &&
     properties.reduce((accumulator, property) => {
-      accumulator[property.key.name] = property.value;
+      if (property?.key?.name) {
+        accumulator[property.key.name] = property.value;
+      }
       return accumulator;
     }, {})
   );

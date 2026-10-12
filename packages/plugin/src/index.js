@@ -19,7 +19,7 @@ module.exports = () => {
         if (this.ran) return;
         this.ran = true;
 
-        if (opts.onlyConvertNamedClass == false) {
+        if (opts.onlyConvertNamedClass === false) {
           throw new Error(
             "ERROR: onlyConvertNamedClass=false is no longer supported. Use autoConvertAllExtendClassesByDefault=true"
           );

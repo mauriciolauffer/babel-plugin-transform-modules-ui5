@@ -11,15 +11,16 @@ const resolveSource = (src, filename) => {
   src = src.replace(/\\/g, "/");
   const dir = dirname(filename);
   const absoluteSrc = join(dir, src);
-  if (existsSync(absoluteSrc) && statSync(absoluteSrc).isDirectory) {
-    if (
-      existsSync(join(absoluteSrc, "index.js")) ||
-      existsSync(join(absoluteSrc, "index.jsx")) ||
-      existsSync(join(absoluteSrc, "index.ts")) ||
-      existsSync(join(absoluteSrc, "index.tsx")) ||
-      existsSync(join(absoluteSrc, "index.mjs")) ||
-      existsSync(join(absoluteSrc, "index.cjs"))
-    ) {
+  if (existsSync(absoluteSrc) && statSync(absoluteSrc).isDirectory()) {
+    const indexExtensions = [
+      "index.js",
+      "index.jsx",
+      "index.ts",
+      "index.tsx",
+      "index.mjs",
+      "index.cjs",
+    ];
+    if (indexExtensions.some((ext) => existsSync(join(absoluteSrc, ext)))) {
       src = `${src}/index`;
     }
   }
@@ -61,7 +62,7 @@ const addImport = (imports, imp, filename, first) => {
           );
           imp.src = imp.src.slice(0, -3);
         }
-      } catch (ex) {
+      } catch {
         // ignore the error, do not slice file extension as the module
         // can't be resolved with the given file extension, e.g.
         // myns/module.js must be provided as myns/module
